@@ -8,7 +8,7 @@
 粘贴 B站链接 → 下载音频 → 语音转文字(Whisper) → AI整理+笔记(DeepSeek) → 展示结果
 ```
 
-- **下载**：yt-dlp 仅下载音频流（MP3）
+- **下载**：直接调用 Bilibili API 获取音频流（无需 yt-dlp）
 - **转码**：FFmpeg 转为 16kHz 单声道 WAV
 - **ASR**：faster-whisper base 模型（CPU 本地运行，完全免费）
 - **LLM**：DeepSeek API 做文本整理和结构化笔记
@@ -46,9 +46,25 @@ python3 -c "from faster_whisper import WhisperModel; WhisperModel('base', device
 
 > 这会下载约 140MB 的模型文件（仅首次需要）。如果网络慢，可改用 `tiny` 模型（约 75MB，更快但准确率略低）。
 
-### 4. 配置 API Key
+### 4. 配置 API Key（二选一）
 
-编辑 `config.py`，确认以下内容：
+#### 方法1：环境变量（推荐，不写死在代码里）
+
+```bash
+export DEEPSEEK_API_KEY="你的DeepSeek API密钥"
+export DEEPSEEK_MODEL="deepseek-v4-flash"     # 或 deepseek-v4-pro
+python3 -m bilisum.run
+```
+
+每次启动终端都需要重新 export，或写入 `~/.bashrc` 永久生效。
+
+#### 方法2：直接改 config.py
+
+```bash
+nano bilisum/config.py
+```
+
+修改为：
 
 ```python
 DEEPSEEK_API_KEY = "你的DeepSeek API密钥"     # 必填
@@ -58,8 +74,14 @@ DEEPSEEK_MODEL = "deepseek-v4-flash"          # 或 deepseek-v4-pro
 
 > 可以改用 `deepseek-v4-pro` 获得更强效果，但响应速度会慢一些。
 
-## 启动服务
+## 启动服务（两种方式）
 
+```bash
+source .venv/bin/activate
+python3 -m bilisum.run
+```
+
+或在项目目录直接运行：
 ```bash
 source .venv/bin/activate
 python3 run.py
@@ -132,7 +154,7 @@ https://b23.tv/xxxxxx
 
 ## 技术栈
 
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) — 视频/音频下载
+- [Bilibili API](https://api.bilibili.com/) — 直接调用获取视频信息和音频流
 - [FFmpeg](https://ffmpeg.org/) — 音频转码
 - [faster-whisper](https://github.com/SYSTRAN/faster-whisper) — 本地 ASR 引擎
 - [DeepSeek API](https://platform.deepseek.com/) — LLM 文本整理和摘要生成
