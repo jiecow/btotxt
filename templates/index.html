@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}BiliSum - B站视频转文字{% endblock %}
+{% block content %}
+<section class="input-section">
+    <form action="/submit" method="post" class="url-form">
+        <label for="url">B站视频链接</label>
+        <div class="input-group">
+            <input type="url" name="url" id="url"
+                   placeholder="粘贴 B 站视频链接，例如 https://www.bilibili.com/video/BV1xx..."
+                   required autofocus>
+            <button type="submit" class="btn-primary">开始处理</button>
+        </div>
+    </form>
+    {% if error %}
+    <div class="error-msg">{{ error }}</div>
+    {% endif %}
+</section>
+
+<section class="info-section">
+    <div class="steps">
+        <div class="step">
+            <span class="step-icon">1️⃣</span>
+            <span>粘贴链接</span>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <span class="step-icon">2️⃣</span>
+            <span>下载音频</span>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <span class="step-icon">3️⃣</span>
+            <span>语音转文字</span>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <span class="step-icon">4️⃣</span>
+            <span>AI 生成笔记</span>
+        </div>
+    </div>
+</section>
+
+{% if recent %}
+<section class="recent-section">
+    <h3>最近处理</h3>
+    <ul class="recent-list">
+    {% for t in recent %}
+        <li>
+            <a href="/result/{{ t.id }}">
+                <span class="recent-title">{{ t.title or '未知视频' }}</span>
+                <span class="recent-status status-{{ t.status }}">{{ t.status }}</span>
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% endblock %}

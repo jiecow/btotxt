@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BiliSum - B站视频转文字{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="site-header">
+            <h1><a href="/">🎬 BiliSum</a></h1>
+            <p class="subtitle">B站视频 → 转写文本 → AI 笔记</p>
+        </header>
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+        <footer>
+            <p>Powered by yt-dlp · faster-whisper · DeepSeek</p>
+        </footer>
+    </div>
+</body>
+</html>
