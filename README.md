@@ -26,7 +26,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/jiecow/bilisum.git
+git clone https://github.com/jiecow/BiliSum.git
 cd bilisum
 ```
 
