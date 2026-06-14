@@ -13,7 +13,4 @@ python3 -m bilisum.run
 3015端口被上一个服务占用了，先停掉再启动：
 kill $(lsof -ti:3015)
 ---
-DEEPSEEK_API_KEY="sk-e3dc1a065de343f6a590ca215cc306f6"会定期失效。
-重新到https://platform.deepseek.com/api_keys申请
-deepseek账号邮箱12****20@qq.com
-微信已绑定 手机号码130******00
+
