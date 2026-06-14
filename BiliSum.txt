@@ -1,0 +1,22 @@
+# 构建
+npm run docker:build
+
+docker run --rm -p 3838:3838 \  -v bilisum-data:/data \  -e VIDEO_SUM_ACCESS_TOKEN=your-token \  -e VIDEO_SUM_LLM_ENABLED=true \  -e IDEO_SUM_LLM_BASE_URL=https://api.deepseek.com \  -e VIDEO_SUM_LLM_MODEL=deepseek-v4-flash \  -e VIDEO_SUM_LLM_API_KEY=sk-565b96b2379d43d3a6d767220b0b48ae \  -e VIDEO_SUM_SILICONFLOW_ASR_API_KEY=your-key \  lycohana/bilisum:latest
+
+# 运行
+docker run --rm -p 3838:3838 \
+  -v bilisum-data:/data \
+  -e VIDEO_SUM_ACCESS_TOKEN=your-token \
+  -e VIDEO_SUM_LLM_ENABLED=true \
+  -e VIDEO_SUM_LLM_BASE_URL=https://coding.dashscope.aliyuncs.com/v1 \
+  -e VIDEO_SUM_LLM_MODEL=qwen3.5-plus \
+  -e VIDEO_SUM_LLM_API_KEY=your-key \
+  -e VIDEO_SUM_SILICONFLOW_ASR_API_KEY=your-key \
+  lycohana/bilisum:latest
+访问 http://127.0.0.1:3838。容器内服务监听 0.0.0.0:3838，数据目录 /data。
+
+docker pull lycohana/bilisum:latest
+
+
+
+SiliconFlow（硅基流动）

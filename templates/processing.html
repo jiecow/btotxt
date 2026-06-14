@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}处理中... - BiliSum{% endblock %}
+{% block content %}
+<section class="processing-section">
+    <h2>⏳ 处理中</h2>
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <p class="progress-message" id="progress-message">准备中...</p>
+    <p class="progress-percent" id="progress-percent">0%</p>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+const TASK_ID = "{{ task_id }}";
+const POLL_INTERVAL = 2000;
+
+async function pollStatus() {
+    try {
+        const resp = await fetch(`/status/${TASK_ID}`);
+        const data = await resp.json();
+
+        const bar = document.getElementById('progress-bar');
+        const msg = document.getElementById('progress-message');
+        const pct = document.getElementById('progress-percent');
+
+        if (bar) bar.style.width = data.progress + '%';
+        if (pct) pct.textContent = data.progress + '%';
+        if (msg) msg.textContent = data.message || data.status;
+
+        if (data.status === 'done') {
+            window.location.href = `/result/${TASK_ID}`;
+        } else if (data.status === 'error') {
+            window.location.href = `/result/${TASK_ID}`;
+        } else {
+            setTimeout(pollStatus, POLL_INTERVAL);
+        }
+    } catch (e) {
+        setTimeout(pollStatus, POLL_INTERVAL);
+    }
+}
+
+pollStatus();
+</script>
+{% endblock %}

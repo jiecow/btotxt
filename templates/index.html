@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}BiliSum - B站视频转文字{% endblock %}
+{% block content %}
+<section class="input-section">
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+        <button class="mode-tab {% if not show_import %}active{% endif %}"
+                id="tab-url" onclick="switchMode('url')">
+            🔗 B站链接
+        </button>
+        <button class="mode-tab {% if show_import %}active{% endif %}"
+                id="tab-import" onclick="switchMode('import')">
+            📥 导入字幕
+        </button>
+    </div>
+
+    <!-- URL input mode -->
+    <div class="mode-panel" id="panel-url"
+         {% if show_import %}style="display:none"{% endif %}>
+        <form action="/submit" method="post" class="url-form">
+            <label for="url">B站视频链接</label>
+            <div class="input-group">
+                <input type="url" name="url" id="url"
+                       placeholder="粘贴 B 站视频链接，例如 https://www.bilibili.com/video/BV1xx..."
+                       required autofocus>
+                <button type="submit" class="btn-primary">开始处理</button>
+            </div>
+
+            <div class="style-selector">
+                <label for="note_style_url">笔记风格</label>
+                <div class="style-options">
+                    {% for key, style in note_styles.items() %}
+                    <label class="style-option {% if key == 'default' %}selected{% endif %}">
+                        <input type="radio" name="note_style" value="{{ key }}"
+                               {% if key == 'default' %}checked{% endif %}>
+                        <span class="style-label">{{ style.label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- File import mode -->
+    <div class="mode-panel" id="panel-import"
+         {% if not show_import %}style="display:none"{% endif %}>
+        <form action="/import" method="post" enctype="multipart/form-data" class="import-form">
+            <label for="subtitle_file">上传字幕文件</label>
+            <div class="file-drop-zone" id="drop-zone">
+                <div class="file-drop-content">
+                    <span class="file-drop-icon">📁</span>
+                    <p>拖拽字幕文件到此处，或点击选择文件</p>
+                    <p class="file-drop-hint">支持 .srt / .vtt / .txt 格式</p>
+                    <input type="file" name="subtitle_file" id="subtitle_file"
+                           accept=".srt,.vtt,.txt" required>
+                    <span class="file-name" id="file-name"></span>
+                </div>
+            </div>
+
+            <div class="style-selector">
+                <label for="note_style_import">笔记风格</label>
+                <div class="style-options">
+                    {% for key, style in note_styles.items() %}
+                    <label class="style-option {% if key == 'default' %}selected{% endif %}">
+                        <input type="radio" name="note_style" value="{{ key }}"
+                               {% if key == 'default' %}checked{% endif %}>
+                        <span class="style-label">{{ style.label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="import-submit-btn" disabled>
+                开始处理
+            </button>
+        </form>
+    </div>
+
+    {% if error %}
+    <div class="error-msg">{{ error }}</div>
+    {% endif %}
+</section>
+
+<section class="info-section">
+    <div class="steps">
+        <div class="step">
+            <span class="step-icon">1️⃣</span>
+            <span>粘贴链接 / 导入字幕</span>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <span class="step-icon">2️⃣</span>
+            <span>下载音频</span>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <span class="step-icon">3️⃣</span>
+            <span>语音转文字</span>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+            <span class="step-icon">4️⃣</span>
+            <span>AI 生成笔记</span>
+        </div>
+    </div>
+</section>
+
+{% if recent %}
+<section class="recent-section">
+    <h3>最近处理</h3>
+    <ul class="recent-list">
+    {% for t in recent %}
+        <li>
+            <a href="/result/{{ t.id }}">
+                <span class="recent-title">{{ t.title or '未知视频' }}</span>
+                <span class="recent-status status-{{ t.status }}">{{ t.status }}</span>
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
+<script>
+// ---- Mode switching ----
+function switchMode(mode) {
+    document.getElementById('tab-url').classList.toggle('active', mode === 'url');
+    document.getElementById('tab-import').classList.toggle('active', mode === 'import');
+    document.getElementById('panel-url').style.display = mode === 'url' ? '' : 'none';
+    document.getElementById('panel-import').style.display = mode === 'import' ? '' : 'none';
+}
+
+// ---- Note style highlight ----
+document.querySelectorAll('.style-option input').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const panel = this.closest('.mode-panel');
+        panel.querySelectorAll('.style-option').forEach(el => el.classList.remove('selected'));
+        this.closest('.style-option').classList.add('selected');
+    });
+});
+
+// ---- File drop zone ----
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('subtitle_file');
+const fileName = document.getElementById('file-name');
+const submitBtn = document.getElementById('import-submit-btn');
+
+if (dropZone) {
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileName();
+        }
+    });
+
+    fileInput.addEventListener('change', updateFileName);
+}
+
+function updateFileName() {
+    if (fileInput.files.length) {
+        fileName.textContent = '已选择: ' + fileInput.files[0].name;
+        submitBtn.disabled = false;
+    } else {
+        fileName.textContent = '';
+        submitBtn.disabled = true;
+    }
+}
+</script>
+{% endblock %}

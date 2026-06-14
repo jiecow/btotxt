@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ title or '结果' }} - BiliSum{% endblock %}
+{% block content %}
+<section class="result-header">
+    <h2>{{ title or '(未知视频)' }}</h2>
+    {% if note_style_label %}
+    <span class="style-badge">{{ note_style_label }}</span>
+    {% endif %}
+    {% if status == 'error' %}
+    <div class="error-banner">
+        ❌ 处理出错：{{ error }}
+    </div>
+    {% endif %}
+</section>
+
+{% if notes %}
+<section class="notes-section">
+    <div class="section-header">
+        <h3>📝 AI 笔记</h3>
+        <a href="/export/{{ task_id }}/notes" class="btn-export"
+           title="导出笔记为 Markdown 文件">
+            💾 导出笔记
+        </a>
+    </div>
+    <div class="notes-content markdown-body">
+        {{ notes | replace('\n', '<br>') | safe }}
+    </div>
+</section>
+{% endif %}
+
+{% if polished_text %}
+<section class="transcript-section">
+    <div class="section-header">
+        <h3>📄 整理后文本</h3>
+        <a href="/export/{{ task_id }}/transcript" class="btn-export"
+           title="导出整理文本为 TXT 文件">
+            💾 导出文本
+        </a>
+    </div>
+    <div class="transcript-text">
+        {{ polished_text | replace('\n', '<br>') | safe }}
+    </div>
+</section>
+{% endif %}
+
+{% if segments %}
+<section class="segments-section">
+    <div class="section-header">
+        <h3>⏱️ 带时间戳的转写</h3>
+        <a href="/export/{{ task_id }}/srt" class="btn-export"
+           title="导出为 SRT 字幕文件">
+            💾 导出字幕
+        </a>
+    </div>
+    <div class="segments-list">
+    {% for seg in segments %}
+        <div class="segment">
+            <span class="segment-time">{{ '%02d:%02d' | format(seg.start // 60, seg.start % 60) }}</span>
+            <span class="segment-text">{{ seg.text }}</span>
+        </div>
+    {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<div class="actions">
+    <a href="/" class="btn-secondary">← 处理新链接</a>
+</div>
+{% endblock %}
